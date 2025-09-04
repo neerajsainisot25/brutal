@@ -56,16 +56,23 @@ export function validateName(name: string): { isValid: boolean; sanitized: strin
 
 // Enhanced rate limiting store with cleanup (use Redis in production)
 const rateLimitStore = new Map<string, { count: number; resetTime: number; firstRequest: number }>()
+let lastCleanup = Date.now()
 
-// Cleanup old entries every 10 minutes
-setInterval(() => {
+// Cleanup function to prevent memory leaks
+function cleanupRateLimit() {
   const now = Date.now()
+  
+  // Only cleanup every 10 minutes to avoid performance issues
+  if (now - lastCleanup < 600000) return
+  
   for (const [key, value] of rateLimitStore.entries()) {
     if (now > value.resetTime + 600000) { // 10 minutes after reset
       rateLimitStore.delete(key)
     }
   }
-}, 600000)
+  
+  lastCleanup = now
+}
 
 export function checkRateLimit(
   identifier: string, 
@@ -75,6 +82,9 @@ export function checkRateLimit(
   if (!identifier || typeof identifier !== 'string') {
     return { allowed: false, remaining: 0, resetTime: Date.now() + windowMs }
   }
+  
+  // Cleanup old entries periodically
+  cleanupRateLimit()
   
   const now = Date.now()
   const key = `rate_limit:${identifier}`

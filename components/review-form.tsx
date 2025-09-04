@@ -27,28 +27,73 @@ export function ReviewForm() {
       return
     }
 
+    // Validate email if provided
+    if (formData.email.trim()) {
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+      if (!emailRegex.test(formData.email.trim())) {
+        setMessage("Please enter a valid email address")
+        return
+      }
+    }
+
     setIsSubmitting(true)
     setMessage("")
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
     try {
       const response = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
+        signal: controller.signal,
       })
 
-      const data = await response.json()
+      clearTimeout(timeoutId)
 
-      if (response.ok) {
-        setMessage(data.message)
-        if (data.redirect) {
-          setTimeout(() => (window.location.href = data.redirect), 1500)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error occurred" }))
+        
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('retry-after')
+          setMessage(`Too many requests. Try again in ${retryAfter || '60'} seconds.`)
+        } else if (response.status >= 500) {
+          setMessage("Server error. Please try again later.")
+        } else {
+          setMessage(errorData.error || "Something went wrong")
+        }
+        return
+      }
+
+      const data = await response.json()
+      setMessage(data.message || "Success!")
+      
+      if (data.redirect) {
+        // Clear form on success
+        setFormData({
+          name: "",
+          email: "",
+          review: "",
+          idea_opinion: "",
+          suggestion: "",
+        })
+        setTimeout(() => {
+          window.location.href = data.redirect
+        }, 1500)
+      }
+    } catch (error) {
+      clearTimeout(timeoutId)
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          setMessage("Request timed out. Please try again.")
+        } else {
+          setMessage("Network error. Check your connection and try again.")
         }
       } else {
-        setMessage(data.error || "Something went wrong")
+        setMessage("An unexpected error occurred. Please try again.")
       }
-    } catch {
-      setMessage("Network error. Try again.")
     } finally {
       setIsSubmitting(false)
     }
