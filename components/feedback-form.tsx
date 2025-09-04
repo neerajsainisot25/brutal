@@ -168,7 +168,21 @@ export function FeedbackForm() {
         {isSubmitting ? "SENDING..." : "SUBMIT RAW THOUGHTS"}
       </Button>
 
-      {message && <div className="text-center text-white text-lg font-bold uppercase">{message}</div>}
+      {message && (
+        <div 
+          className={`text-center text-lg font-bold uppercase ${
+            message.includes('error') || message.includes('wrong') || message.includes('invalid') || message.includes('required') 
+              ? 'text-red-400' 
+              : message.includes('Success') || message.includes('locked') || message.includes('got your')
+              ? 'text-green-400'
+              : 'text-white'
+          }`}
+          role="alert"
+          aria-live="polite"
+        >
+          {message}
+        </div>
+      )}
     </form>
   )
 }

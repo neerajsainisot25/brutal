@@ -107,6 +107,8 @@ export function ReviewForm() {
           value={formData.name}
           onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
           className="bg-black border-white text-white placeholder:text-gray-400 text-lg font-bold uppercase"
+          aria-label="Your name (optional)"
+          maxLength={100}
         />
         <Input
           type="email"
@@ -114,6 +116,8 @@ export function ReviewForm() {
           value={formData.email}
           onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
           className="bg-black border-white text-white placeholder:text-gray-400 text-lg font-bold uppercase"
+          aria-label="Your email address (optional)"
+          maxLength={254}
         />
       </div>
 
@@ -122,6 +126,8 @@ export function ReviewForm() {
         value={formData.idea_opinion}
         onChange={(e) => setFormData((prev) => ({ ...prev, idea_opinion: e.target.value }))}
         className="bg-black border-white text-white placeholder:text-gray-400 text-lg font-bold uppercase min-h-24"
+        aria-label="Your first thoughts about glow up"
+        maxLength={2000}
       />
 
       <Textarea
@@ -129,6 +135,8 @@ export function ReviewForm() {
         value={formData.review}
         onChange={(e) => setFormData((prev) => ({ ...prev, review: e.target.value }))}
         className="bg-black border-white text-white placeholder:text-gray-400 text-lg font-bold uppercase min-h-24"
+        aria-label="Your review of the concept"
+        maxLength={2000}
       />
 
       <Textarea
@@ -136,6 +144,8 @@ export function ReviewForm() {
         value={formData.suggestion}
         onChange={(e) => setFormData((prev) => ({ ...prev, suggestion: e.target.value }))}
         className="bg-black border-white text-white placeholder:text-gray-400 text-lg font-bold uppercase min-h-24"
+        aria-label="Your suggestions for improvement"
+        maxLength={2000}
       />
 
       <Button
@@ -146,7 +156,21 @@ export function ReviewForm() {
         {isSubmitting ? "LOCKING IN..." : "LOCK IN YOUR REVIEW"}
       </Button>
 
-      {message && <div className="text-center text-white text-lg font-bold uppercase">{message}</div>}
+      {message && (
+        <div 
+          className={`text-center text-lg font-bold uppercase ${
+            message.includes('error') || message.includes('wrong') || message.includes('invalid') || message.includes('required') 
+              ? 'text-red-400' 
+              : message.includes('Success') || message.includes('locked') || message.includes('review')
+              ? 'text-green-400'
+              : 'text-white'
+          }`}
+          role="alert"
+          aria-live="polite"
+        >
+          {message}
+        </div>
+      )}
     </form>
   )
 }

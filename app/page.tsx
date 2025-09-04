@@ -3,8 +3,10 @@
 import { Button } from "@/components/ui/button"
 import { WaitlistForm } from "@/components/waitlist-form"
 import Link from "next/link"
+import { useState } from "react"
 
 export default function BrutalistLanding() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const scrollToContact = () => {
     const contactSection = document.getElementById("contact-section")
     if (contactSection) {
@@ -20,6 +22,8 @@ export default function BrutalistLanding() {
           <div className="flex items-center gap-4">
             <div className="text-2xl font-black text-white">BRUTAL</div>
           </div>
+          
+          {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-6 text-lg">
             <Link href="/about" className="hover:bg-white hover:text-black px-3 py-1 transition-colors duration-100">
               ABOUT
@@ -33,11 +37,61 @@ export default function BrutalistLanding() {
             <button
               onClick={scrollToContact}
               className="hover:bg-white hover:text-black px-3 py-1 transition-colors duration-100"
+              aria-label="Scroll to contact section"
             >
               CONTACT
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden text-white text-2xl font-black"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle mobile menu"
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? '✕' : '☰'}
+          </button>
         </nav>
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t-4 border-white mt-6 pt-6">
+            <div className="flex flex-col space-y-4 text-lg">
+              <Link 
+                href="/about" 
+                className="hover:bg-white hover:text-black px-3 py-2 transition-colors duration-100"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                ABOUT
+              </Link>
+              <Link 
+                href="/feedback" 
+                className="hover:bg-white hover:text-black px-3 py-2 transition-colors duration-100"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                FEEDBACK
+              </Link>
+              <Link 
+                href="/reviews" 
+                className="hover:bg-white hover:text-black px-3 py-2 transition-colors duration-100"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                REVIEWS
+              </Link>
+              <button
+                onClick={() => {
+                  scrollToContact()
+                  setIsMobileMenuOpen(false)
+                }}
+                className="hover:bg-white hover:text-black px-3 py-2 transition-colors duration-100 text-left"
+                aria-label="Scroll to contact section"
+              >
+                CONTACT
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
