@@ -1,0 +1,34 @@
+{
+  "name": "Brutal App",
+  "description": "A modern Next.js application with brutal design",
+  "repository": "https://github.com/yourusername/brutal-app",
+  "logo": "https://cdn.jsdelivr.net/gh/yourusername/brutal-app/public/logo.png",
+  "keywords": ["nextjs", "react", "typescript", "tailwindcss"],
+  "success_url": "/",
+  "env": {
+    "POSTGRES_URL_NON_POOLING": {
+      "description": "PostgreSQL database URL for the application",
+      "required": true
+    },
+    "NEXT_PUBLIC_APP_URL": {
+      "description": "The URL where your app will be deployed",
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
