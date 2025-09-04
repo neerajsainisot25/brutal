@@ -23,15 +23,24 @@ export function WaitlistForm() {
       return
     }
 
-    // Client-side email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(trimmedEmail)) {
+    // Enhanced client-side email validation
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+    
+    if (!emailRegex.test(trimmedEmail) || 
+        trimmedEmail.length > 254 || 
+        trimmedEmail.length < 5 ||
+        trimmedEmail.includes('..') ||
+        trimmedEmail.startsWith('.') ||
+        trimmedEmail.endsWith('.')) {
       setMessage("Please enter a valid email address")
       return
     }
 
     setIsLoading(true)
     setMessage("")
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
     try {
       const response = await fetch("/api/waitlist", {
@@ -40,23 +49,46 @@ export function WaitlistForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email: trimmedEmail }),
+        signal: controller.signal,
       })
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error occurred" }))
+        
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('retry-after')
+          setMessage(`Too many requests. Try again in ${retryAfter || '60'} seconds.`)
+        } else if (response.status >= 500) {
+          setMessage("Server error. Please try again later.")
+        } else {
+          setMessage(errorData.error || "Something went wrong")
+        }
+        return
+      }
 
       const data = await response.json()
 
-      if (response.ok) {
-        if (data.redirect) {
-          setMessage("Redirecting...")
-          setTimeout(() => router.push(data.redirect), 1000)
+      if (data.redirect) {
+        setMessage("Success! Redirecting...")
+        setTimeout(() => router.push(data.redirect), 1000)
+      } else {
+        setMessage(data.message || "Success!")
+        setEmail("")
+      }
+    } catch (error) {
+      clearTimeout(timeoutId)
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          setMessage("Request timed out. Please try again.")
         } else {
-          setMessage(data.message)
-          setEmail("")
+          setMessage("Network error. Check your connection and try again.")
         }
       } else {
-        setMessage(data.error || "Something went wrong")
+        setMessage("An unexpected error occurred. Please try again.")
       }
-    } catch {
-      setMessage("Network error. Check your connection and try again.")
     } finally {
       setIsLoading(false)
     }

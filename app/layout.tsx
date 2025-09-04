@@ -19,6 +19,18 @@ export const metadata: Metadata = {
   description: "No illusions. No compromise. No shortcuts. No filters. Join the brutal revolution.",
   keywords: ["brutal", "raw", "unfiltered", "transformation", "confidence", "progress"],
   authors: [{ name: "BRUTAL Team" }],
+  robots: "index, follow",
+  openGraph: {
+    title: "BRUTAL - Raw. Bold. Unfiltered.",
+    description: "No illusions. No compromise. No shortcuts. No filters. Join the brutal revolution.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BRUTAL - Raw. Bold. Unfiltered.",
+    description: "No illusions. No compromise. No shortcuts. No filters. Join the brutal revolution.",
+  },
 };
 
 export const viewport = {

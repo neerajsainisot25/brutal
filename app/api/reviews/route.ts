@@ -1,11 +1,18 @@
 import { neon } from "@neondatabase/serverless"
 import { type NextRequest, NextResponse } from "next/server"
-import { isValidEmail, sanitizeInput, checkRateLimit } from "@/lib/validation"
+import { isValidEmail, sanitizeInput, checkRateLimit, normalizeIP } from "@/lib/validation"
+import { logger } from "@/lib/logger"
 
 export async function POST(request: NextRequest) {
+  // Extract client IP outside try block for error logging
+  const clientIP = normalizeIP(
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
+  )
+  
   try {
     // Rate limiting
-    const clientIP = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
     const rateLimit = checkRateLimit(`reviews-${clientIP}`, 3, 60000) // 3 requests per minute
     
     if (!rateLimit.allowed) {
@@ -50,7 +57,7 @@ export async function POST(request: NextRequest) {
         )
       `
     } catch (dbError) {
-      console.error("Database setup error:", dbError)
+      logger.error("Database setup error", dbError, { ip: clientIP })
       return NextResponse.json({ error: "Database setup failed" }, { status: 500 })
     }
 
@@ -75,7 +82,11 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     )
   } catch (error) {
-    console.error("Reviews API error:", error)
+    logger.error("Reviews API error", error, { 
+      ip: clientIP,
+      userAgent: request.headers.get('user-agent'),
+      timestamp: new Date().toISOString()
+    })
     return NextResponse.json(
       {
         error: "Internal server error. Please try again later.",
