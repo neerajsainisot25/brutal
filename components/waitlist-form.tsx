@@ -16,8 +16,17 @@ export function WaitlistForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!email.trim()) {
+    const trimmedEmail = email.trim()
+    
+    if (!trimmedEmail) {
       setMessage("Email is required")
+      return
+    }
+
+    // Client-side email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(trimmedEmail)) {
+      setMessage("Please enter a valid email address")
       return
     }
 
@@ -30,7 +39,7 @@ export function WaitlistForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: trimmedEmail }),
       })
 
       const data = await response.json()

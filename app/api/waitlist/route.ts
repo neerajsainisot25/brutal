@@ -1,14 +1,37 @@
 import { neon } from "@neondatabase/serverless"
 import { type NextRequest, NextResponse } from "next/server"
+import { isValidEmail, sanitizeInput, checkRateLimit } from "@/lib/validation"
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const clientIP = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+    const rateLimit = checkRateLimit(clientIP, 5, 60000) // 5 requests per minute
+    
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': '5',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': new Date(rateLimit.resetTime).toISOString()
+          }
+        }
+      )
+    }
+
     const { email, name } = await request.json()
 
-    // Validate email
-    if (!email || !email.includes("@")) {
+    // Validate email properly
+    if (!email || !isValidEmail(email)) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 })
     }
+
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(email.toLowerCase(), 254)
+    const sanitizedName = name ? sanitizeInput(name, 100) : null
 
     const sql = neon(process.env.POSTGRES_URL_NON_POOLING!)
 
@@ -29,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     // Check if email already exists
     const existing = await sql`
-      SELECT email FROM waitlist WHERE email = ${email.toLowerCase()} LIMIT 1
+      SELECT email FROM waitlist WHERE email = ${sanitizedEmail} LIMIT 1
     `
 
     if (existing.length > 0) {
@@ -45,7 +68,7 @@ export async function POST(request: NextRequest) {
     // Insert new waitlist entry
     await sql`
       INSERT INTO waitlist (email, name, created_at) 
-      VALUES (${email.toLowerCase()}, ${name || null}, NOW())
+      VALUES (${sanitizedEmail}, ${sanitizedName}, NOW())
     `
 
     return NextResponse.json(
@@ -59,8 +82,7 @@ export async function POST(request: NextRequest) {
     console.error("Waitlist API error:", error)
     return NextResponse.json(
       {
-        error: "Failed to join waitlist",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: "Internal server error. Please try again later.",
       },
       { status: 500 },
     )
