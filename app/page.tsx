@@ -1,5 +1,6 @@
 "use client"
 
+import { Analytics } from "@vercel/analytics/next"
 import { Button } from "@/components/ui/button"
 import { WaitlistForm } from "@/components/waitlist-form"
 import Link from "next/link"
@@ -226,6 +227,7 @@ export default function BrutalistLanding() {
           <div className="border-t-4 border-white mt-12 pt-8 text-center">
             <p className="text-lg font-bold">© 2025 BRUTAL.RAW </p>
           </div>
+          <Analytics />
         </div>
       </footer>
     </div>

@@ -78,20 +78,39 @@ export async function POST(request: NextRequest) {
 
     const sql = neon(process.env.POSTGRES_URL_NON_POOLING)
 
-    // Ensure waitlist table exists with proper constraints
+    // Ensure waitlist table exists with proper constraints and handle migrations
     try {
+      // First, create the table if it doesn't exist
       await sql`
         CREATE TABLE IF NOT EXISTS waitlist (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           email TEXT UNIQUE NOT NULL CHECK (length(email) > 0 AND length(email) <= 254),
           name TEXT CHECK (name IS NULL OR (length(name) > 0 AND length(name) <= 100)),
-          ip_address INET,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         )
       `
       
-      // Create index for performance
+      // Add missing columns if they don't exist (migration)
+      const existingColumns = await sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'waitlist'
+      `
+      
+      const columnNames = existingColumns.map(col => col.column_name)
+      
+      // Add ip_address column if missing
+      if (!columnNames.includes('ip_address')) {
+        await sql`ALTER TABLE waitlist ADD COLUMN ip_address INET`
+      }
+      
+      // Add updated_at column if missing
+      if (!columnNames.includes('updated_at')) {
+        await sql`ALTER TABLE waitlist ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()`
+      }
+      
+      // Create indexes for performance
       await sql`
         CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist(email)
       `
@@ -99,6 +118,11 @@ export async function POST(request: NextRequest) {
       // Create index on created_at for analytics
       await sql`
         CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist(created_at)
+      `
+      
+      // Create index on ip_address for rate limiting queries
+      await sql`
+        CREATE INDEX IF NOT EXISTS idx_waitlist_ip_address ON waitlist(ip_address)
       `
     } catch (dbError) {
       logger.error("Database setup error", dbError, { ip: clientIP })
