@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Button } from "@/components/ui/button"
 import { WaitlistForm } from "@/components/waitlist-form"
 import Link from "next/link"
+import Image from "next/image"
 import { useState } from "react"
 
 export default function BrutalistLanding() {
@@ -23,7 +24,7 @@ export default function BrutalistLanding() {
           <div className="flex items-center gap-4">
             <div className="text-2xl font-black text-white">BRUTAL</div>
           </div>
-          
+
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-6 text-lg">
             <Link href="/about" className="hover:bg-white hover:text-black px-3 py-1 transition-colors duration-100">
@@ -59,22 +60,22 @@ export default function BrutalistLanding() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t-4 border-white mt-6 pt-6">
             <div className="flex flex-col space-y-4 text-lg">
-              <Link 
-                href="/about" 
+              <Link
+                href="/about"
                 className="hover:bg-white hover:text-black px-3 py-2 transition-colors duration-100"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 ABOUT
               </Link>
-              <Link 
-                href="/feedback" 
+              <Link
+                href="/feedback"
                 className="hover:bg-white hover:text-black px-3 py-2 transition-colors duration-100"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 FEEDBACK
               </Link>
-              <Link 
-                href="/reviews" 
+              <Link
+                href="/reviews"
                 className="hover:bg-white hover:text-black px-3 py-2 transition-colors duration-100"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -134,8 +135,15 @@ export default function BrutalistLanding() {
               </div>
             </div>
             <div className="relative">
-              <div className="w-full h-96 relative overflow-hidden bg-gray-800 flex items-center justify-center">
-                <div className="text-white text-2xl font-bold">BRUTAL VISION</div>
+              <div className="w-full h-96 bg-white/10 border-4 border-white flex items-center justify-center">
+                <Image
+                  src="/2.png"
+                  alt="BRUTAL Logo"
+                  width={1000}
+                  height={400}
+                  className="object-contain max-w-full max-h-full"
+                  priority
+                />
               </div>
             </div>
           </div>
@@ -145,23 +153,57 @@ export default function BrutalistLanding() {
       {/* Services Section */}
       <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-5xl md:text-7xl font-black mb-16 text-center">[FEATURES]</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="border-4 border-white p-8 hover:bg-white hover:text-black transition-colors duration-200">
-              <h3 className="text-3xl font-black mb-4 tracking-wider">[01] CONFIDENCE</h3>
-              <p className="text-lg leading-relaxed">{">"} The only filter you need</p>
+          <h2 className="text-5xl md:text-7xl font-black mb-8 text-center">[WHAT WE OFFER]</h2>
+          <p className="text-xl text-center mb-16 text-gray-300">
+            {">"} NO FLUFF. NO FILLER. JUST RESULTS.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <div className="border-4 border-white p-8 hover:bg-white hover:text-black transition-colors duration-200 group">
+              <h3 className="text-3xl font-black mb-4 tracking-wider">[01] BRUTAL ASSISTANT</h3>
+              <p className="text-lg leading-relaxed mb-4">{">"} Your unfiltered AI mentor</p>
+              <p className="text-sm opacity-80 group-hover:opacity-100">
+                Calls you out. Guides your glow-up. Tracks every move. No sugar-coating allowed.
+              </p>
             </div>
-            <div className="border-4 border-white p-8 hover:bg-white hover:text-black transition-colors duration-200">
-              <h3 className="text-3xl font-black mb-4 tracking-wider">[02] PROGRESS</h3>
-              <p className="text-lg leading-relaxed">{">"} Tracked. Visible. Undeniable.</p>
+            
+            <div className="border-4 border-white p-8 hover:bg-white hover:text-black transition-colors duration-200 group">
+              <h3 className="text-3xl font-black mb-4 tracking-wider">[02] GLOW-UP ENGINE</h3>
+              <p className="text-lg leading-relaxed mb-4">{">"} Progress tracking that matters</p>
+              <p className="text-sm opacity-80 group-hover:opacity-100">
+                Analyzes. Adapts. Demands results. Your transformation, measured and maximized.
+              </p>
             </div>
-            <div className="border-4 border-white p-8 hover:bg-white hover:text-black transition-colors duration-200">
-              <h3 className="text-3xl font-black mb-4 tracking-wider">[03] TRANSFORMATION</h3>
-              <p className="text-lg leading-relaxed">{">"} More than skin deep</p>
+            
+            <div className="border-4 border-white p-8 hover:bg-white hover:text-black transition-colors duration-200 group">
+              <h3 className="text-3xl font-black mb-4 tracking-wider">[03] RAW FEEDBACK</h3>
+              <p className="text-lg leading-relaxed mb-4">{">"} Truth without the cushion</p>
+              <p className="text-sm opacity-80 group-hover:opacity-100">
+                Honest insights that cut through denial. Real feedback for real growth.
+              </p>
             </div>
-            <div className="border-4 border-white p-8 hover:bg-white hover:text-black transition-colors duration-200">
-              <h3 className="text-3xl font-black mb-4 tracking-wider">[04] PERSONALIZATION</h3>
-              <p className="text-lg leading-relaxed">{">"} Built for you. Not for the crowd</p>
+            
+            <div className="border-4 border-white p-8 hover:bg-white hover:text-black transition-colors duration-200 group">
+              <h3 className="text-3xl font-black mb-4 tracking-wider">[04] PERSONALIZED BRUTALITY</h3>
+              <p className="text-lg leading-relaxed mb-4">{">"} Built for you. Not the crowd</p>
+              <p className="text-sm opacity-80 group-hover:opacity-100">
+                Tailored challenges that push your limits. Custom paths to your best self.
+              </p>
+            </div>
+          </div>
+
+          {/* Know More CTA */}
+          <div className="text-center">
+            <div className="border-4 border-white p-8 bg-white/5 backdrop-blur-sm">
+              <h3 className="text-2xl font-black mb-4 tracking-wider">WANT THE FULL PICTURE?</h3>
+              <p className="text-lg mb-6 text-gray-300">
+                {">"} This is just the surface. The real power lies beneath.
+              </p>
+              <Link href="/about">
+                <Button className="bg-white text-black hover:bg-gray-200 text-lg px-8 py-4 font-bold tracking-wider border-4 border-white rounded-none">
+                  [KNOW MORE →]
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
